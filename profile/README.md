@@ -15,8 +15,8 @@ We offer a few custom medals and more features to come!
 
 - **bancho.py** (Python)  
   Somtum-modded version of bancho.py  
-  - Production: `v4.8.1`  
-  - Upcoming: `v5.2.2+somtummodded`
+  - Production (Archived): `v4.8.1`  
+  - Upcoming: `v5.3.0+somtummodded`
 
 - **gukarkka** (TypeScript / Next.js)  
   Next-gen frontend  
@@ -26,10 +26,10 @@ We offer a few custom medals and more features to come!
   Anti-cheat system to detect illegitimate plays  
   - Upcoming
 
-### Archive Soon
+### Archived
 
 - **guweb** (Python)  
-  Current frontend  
+  Previous frontend  
   - Production: `v1.3.0`
 
 ---
