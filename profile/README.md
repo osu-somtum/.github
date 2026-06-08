@@ -11,20 +11,19 @@ We offer a few custom medals and more features to come!
 
 ## 🛠 Tech Stack
 
-### Current / Upcoming
+### Current
 
 - **bancho.py** (Python)  
   Somtum-modded version of bancho.py  
-  - Production (Archived): `v4.8.1`  
-  - Upcoming: `v5.3.0+somtummodded`
+  - Production: `v5.3.0+somtummodded`
 
 - **gukarkka** (TypeScript / Next.js)  
   Next-gen frontend  
-  - Upcoming: `v2.0`
+  - Current: `v1.0.0`
 
 - **circlecore-somtum** (Python)  
   Anti-cheat system to detect illegitimate plays  
-  - Upcoming
+  - Current: `rolling release`
 
 ### Archived
 
