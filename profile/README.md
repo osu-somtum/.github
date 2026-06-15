@@ -54,7 +54,7 @@ flowchart TB
     end
 
     %% Client connections
-    osu -->|"c.somtum.fun (HTTP, direct)"| ng
+    osu -->|"c.somtum.fun"| cf
     web --> cf --> ng
     dclient <--> bot
 
@@ -106,7 +106,7 @@ flowchart TB
 | Service | Language | Purpose |
 |---|---|---|
 | **bancho.py** | Python/FastAPI | Core game server (osu! protocol, scoring, multiplayer) |
-| **gukarkka** | Next.js 14/TypeScript | Web frontend — profiles, leaderboards, beatmap browser |
+| **gukarkka** | Next.js 14/TypeScript | Web frontend — profiles, leaderboards, beatmap browser & uploads |
 | **Discord-Bot-Somtum** | Python/discord.py | Community bot — stats, moderation, beatmap workflow |
 | **Circlecore-somtum** | Python/FastAPI | Anti-cheat — replay analysis & similarity detection |
 | **payments-service** | Python/FastAPI | Donation processing (TrueMoney, PromptPay, Stripe) |
@@ -136,6 +136,17 @@ flowchart TB
 5. Circlecore fires Discord webhook alert if suspicious
 6. First-place announcements sent via Discord webhook
 
+### Beatmap Upload Flow
+
+osu!somtum lets players host their own beatmaps (a custom feature not in vanilla bancho.py):
+
+1. Player uploads an `.osz` to bancho.py via `POST session.somtum.fun/beatmap/upload`
+2. bancho.py validates the session, parses the zip, and SHA-256-dedups each difficulty against existing maps
+3. Each diff is cross-checked against the osu! API v1 to reject maps already submitted to osu!
+4. A fresh somtum set ID is allocated; `BeatmapID`/`BeatmapSetID` lines are rewritten and the map is persisted to disk
+5. `mapsets`/`maps` rows are inserted as `somtum_only` with status `Pending`, awaiting nomination
+6. Upload is audited via Discord webhook
+
 ## Tech Stack
 
 | Category | Technologies |
@@ -163,7 +174,9 @@ flowchart TB
 
 | Domain | Service | Notes |
 |---|---|---|
-| `somtum.fun` | gukarkka :3000 | Behind Cloudflare proxy |
-| `session.somtum.fun` / `api.somtum.fun` | bancho.py :5001 | Behind Cloudflare proxy |
-| `c.somtum.fun` | bancho.py :5001 | **Direct** — osu! client does not support Cloudflare proxy |
-| `a.somtum.fun` / `assets.somtum.fun` | Static files | Avatars, replays |
+| `somtum.fun` | gukarkka :3000 | Web frontend |
+| `c` / `ce` / `c4` / `osu` / `b` / `api` `.somtum.fun` | bancho.py :5001 | osu! client + API endpoints |
+| `a.somtum.fun` | Static files | Avatars |
+| `assets.somtum.fun` | Static files | Replays, screenshots |
+
+All subdomains sit behind the Cloudflare proxy; Caddy handles routing and automatic HTTPS at the OVH VPS.
