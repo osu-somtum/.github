@@ -65,6 +65,7 @@ flowchart TB
 
     %% Inter-service HTTP
     gukarkka -->|"player & session data"| bancho
+    gukarkka -->|"donations"| payments
     bancho -->|"replay analysis"| circlecore
     payments -->|"grant_donator"| bancho
     bot -->|"player actions"| bancho
@@ -122,6 +123,7 @@ flowchart TB
 | Caller | Target | Purpose |
 |---|---|---|
 | gukarkka | bancho.py | Player sessions, scores, leaderboards |
+| gukarkka | payments-service | Donation redeem, PromptPay, Stripe checkout, admin approve/reject |
 | bancho.py | Circlecore-somtum | Queue replay for analysis after score submit |
 | payments-service | bancho.py | `POST /internal/grant_donator` — sync donator status |
 | Discord-Bot-Somtum | bancho.py | Player management (restrict, whitelist, etc.) |
