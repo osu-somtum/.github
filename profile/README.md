@@ -26,7 +26,7 @@ flowchart TB
         ng{{"Caddy — Reverse Proxy & Rate Limiting"}}
 
         subgraph Public["Public Services"]
-            bancho["bancho.py<br/>(Python/FastAPI) :5001"]
+            bancho["bancho.py<br/>(Python/FastAPI) :10000"]
             gukarkka["gukarkka<br/>(Next.js 14) :3000"]
             payments["payments-service<br/>(Python/FastAPI) :8001"]
         end
@@ -138,9 +138,9 @@ flowchart TB
 
 ### Beatmap Upload Flow
 
-osu!somtum lets players host their own beatmaps (a custom feature not in vanilla bancho.py):
+osu!somtum lets players host their own beatmaps (a custom feature not in vanilla bancho.py). Uploads are supported both **in-game** (via the standard `osu-osz2-bmsubmit` endpoints on `osu.somtum.fun`) and through the **web frontend**:
 
-1. Player uploads an `.osz` to bancho.py via `POST session.somtum.fun/beatmap/upload`
+1. Player uploads an `.osz` to bancho.py
 2. bancho.py validates the session, parses the zip, and SHA-256-dedups each difficulty against existing maps
 3. Each diff is cross-checked against the osu! API v1 to reject maps already submitted to osu!
 4. A fresh somtum set ID is allocated; `BeatmapID`/`BeatmapSetID` lines are rewritten and the map is persisted to disk
@@ -175,8 +175,9 @@ osu!somtum lets players host their own beatmaps (a custom feature not in vanilla
 | Domain | Service | Notes |
 |---|---|---|
 | `somtum.fun` | gukarkka :3000 | Web frontend |
-| `c` / `ce` / `c4` / `osu` / `b` / `api` `.somtum.fun` | bancho.py :5001 | osu! client + API endpoints |
+| `c` / `ce` / `c4` / `osu` / `b` / `api` / `session` `.somtum.fun` | bancho.py :10000 | osu! client + API endpoints (rate-limited on c/ce/c4/osu) |
+| `payment.somtum.fun` | payments-service :8001 | Donation processing |
 | `a.somtum.fun` | Static files | Avatars |
-| `assets.somtum.fun` | Static files | Replays, screenshots |
+| `assets.somtum.fun` / `assets1.somtum.fun` | Static files | Banners, clan assets, replays |
 
 All subdomains sit behind the Cloudflare proxy; Caddy handles routing and automatic HTTPS at the OVH VPS.
