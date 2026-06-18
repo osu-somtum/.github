@@ -44,6 +44,14 @@ flowchart TB
             redis[("Redis 8.2<br/>Cache & Sessions")]
             files[("Static Files<br/>Avatars & Replays")]
         end
+
+        subgraph Backup["Backups"]
+            timer["somtum-backup.timer<br/>(systemd · hourly)"]
+        end
+    end
+
+    subgraph Offsite["Offsite — Thailand"]
+        miyabi[("Syncthing Replica<br/>Hourly Snapshots")]
     end
 
     subgraph ExternalAPIs["External APIs"]
@@ -84,6 +92,10 @@ flowchart TB
     gukarkka --> redis
     payments & bot --> mysql
 
+    %% Backups
+    mysql & redis & files -->|"hourly dump"| timer
+    timer -->|"Syncthing"| miyabi
+
     %% Styling
     classDef client fill:#e1f5fe,stroke:#01579b,color:#01579b
     classDef proxy fill:#fff3e0,stroke:#e65100,color:#e65100
@@ -92,6 +104,7 @@ flowchart TB
     classDef data fill:#fce4ec,stroke:#c2185b,color:#880e4f
     classDef external fill:#eceff1,stroke:#546e7a,color:#37474f
     classDef bot fill:#e3f2fd,stroke:#1565c0,color:#1565c0
+    classDef backup fill:#fff8e1,stroke:#f9a825,color:#f57f17
 
     class osu,web,dclient client
     class cf,ng proxy
@@ -100,6 +113,7 @@ flowchart TB
     class mysql,redis,files data
     class osuapi,discordwh,truemoney,stripe external
     class bot bot
+    class timer,miyabi backup
 ```
 
 ## Services
@@ -171,6 +185,16 @@ osu!somtum lets players host their own beatmaps (a custom feature not in vanilla
 | **Cloudflare** | DNS, CDN, DDoS protection, SSL certificates |
 | **Caddy** | Reverse proxy, automatic HTTPS, rate limiting |
 | **Podman** | Container runtime & orchestration |
+
+### Backups & Disaster Recovery
+
+A `somtum-backup.timer` systemd user timer fires **hourly** on the OVH VPS, running `scripts/backup.sh` to snapshot:
+
+- `/var/www` (avatars, banners, replays, hosted beatmaps) → `www.tar.gz`
+- MySQL via `mysqldump --single-transaction` → gzipped SQL dump
+- Redis via `SAVE` + a copy of `dump.rdb`
+
+The last **24 hourly snapshots** are retained and older ones are pruned automatically. The entire `server-somtum` directory — backups included — is continuously replicated by **Syncthing** from the production VPS to an offsite machine in Thailand, giving geographically separated, near-real-time copies of all production data independent of OVH and Cloudflare.
 
 ### Domain Routing
 
