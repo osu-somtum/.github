@@ -92,9 +92,12 @@ flowchart TB
     gukarkka --> redis
     payments & bot --> mysql
 
-    %% Backups
+    %% Backups (side branch off the data stores)
     mysql & redis & files -->|"hourly dump"| timer
     timer -->|"Syncthing"| miyabi
+
+    %% Invisible links to keep External APIs as the bottom layer
+    miyabi ~~~ osuapi & discordwh & truemoney & stripe
 
     %% Styling
     classDef client fill:#e1f5fe,stroke:#01579b,color:#01579b
